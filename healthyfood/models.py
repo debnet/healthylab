@@ -1,6 +1,8 @@
 # coding: utf-8
 from common.models import CommonModel
+from django.conf import settings
 from django.db import models
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -27,13 +29,17 @@ class FoodGroup(CommonModel):
         'self', null=True, blank=True, on_delete=models.CASCADE, related_name='subgroups',
         verbose_name=_("parent"))
 
+    class Meta:
+        verbose_name = _("groupe d'aliments")
+        verbose_name_plural = _("groupe d'aliments")
+
 
 class Food(CommonModel):
     """
     Aliment
     """
     code = models.SmallIntegerField(
-        unique=True,
+        primary_key=True,
         verbose_name=_("code"))
     name = models.CharField(
         max_length=1000,
@@ -81,6 +87,10 @@ class Food(CommonModel):
         default=0.0,
         verbose_name=_("amidons"),
         help_text=_("amidons (g/100g)"))
+    fiber = models.FloatField(
+        default=0.0,
+        verbose_name=_("fibres alimentaires"),
+        help_text=_("fibres alimentaires (g/100g)"))
     sugar_alcohol = models.FloatField(
         default=0.0,
         verbose_name=_("polyols"),
@@ -112,59 +122,59 @@ class Food(CommonModel):
     butyric_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide butyrique"),
-        help_text=_("acide butyrique (acides gras saturés 4:0) (g/100g)"))
+        help_text=_("acide butyrique (acide gras saturé 4:0) (g/100g)"))
     caproic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide caproïque"),
-        help_text=_("acide caproïque (acides gras saturés 6:0) (g/100g)"))
+        help_text=_("acide caproïque (acide gras saturé 6:0) (g/100g)"))
     caprylic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide caprylique"),
-        help_text=_("acide caprylique (acides gras saturés 8:0) (g/100g)"))
+        help_text=_("acide caprylique (acide gras saturé 8:0) (g/100g)"))
     capric_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide caprique"),
-        help_text=_("acide caprique (acides gras saturés 10:0) (g/100g)"))
+        help_text=_("acide caprique (acide gras saturé 10:0) (g/100g)"))
     lauric_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide laurique"),
-        help_text=_("acide laurique (acides gras saturés 12:0) (g/100g)"))
+        help_text=_("acide laurique (acide gras saturé 12:0) (g/100g)"))
     myristic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide myristique"),
-        help_text=_("acide myristique (acides gras saturés 14:0) (g/100g)"))
+        help_text=_("acide myristique (acide gras saturé 14:0) (g/100g)"))
     palmitic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide palmitique"),
-        help_text=_("acide palmitique (acides gras saturés 16:0) (g/100g)"))
+        help_text=_("acide palmitique (acide gras saturé 16:0) (g/100g)"))
     stearic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide stéarique"),
-        help_text=_("acide stéarique (acides gras saturés 18:0) (g/100g)"))
+        help_text=_("acide stéarique (acide gras saturé 18:0) (g/100g)"))
     oleic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide oléique"),
-        help_text=_("acide oléique (acides gras insaturés 18:1) (g/100g)"))
+        help_text=_("acide oléique (acide gras insaturé 18:1) (g/100g)"))
     linoleic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide linoléique"),
-        help_text=_("acide linoléique (acides gras insaturés 18:2) (g/100g)"))
+        help_text=_("acide linoléique (acide gras insaturé 18:2) (g/100g)"))
     alpha_linoleic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide alpha-linoléique"),
-        help_text=_("acide alpha-linoléique (acides gras insaturés 18:3) (g/100g)"))
+        help_text=_("acide alpha-linoléique (acide gras insaturé 18:3) (g/100g)"))
     arachidic_acid = models.FloatField(
         default=0.0,
         verbose_name=_("acide arachidonique"),
-        help_text=_("acide arachidonique (acides gras saturés 20:3) (g/100g)"))
+        help_text=_("acide arachidonique (acide gras saturé 20:3) (g/100g)"))
     epa = models.FloatField(
         default=0.0,
         verbose_name=_("EPA"),
-        help_text=_("acide eicosapentaénoïque (acides gras insaturés 20:4) (g/100g)"))
+        help_text=_("acide eicosapentaénoïque (acide gras insaturé 20:4) (g/100g)"))
     dha = models.FloatField(
         default=0.0,
         verbose_name=_("DHA"),
-        help_text=_("acide docosahexaénoïques(acides gras insaturés 22:6) (g/100g)"))
+        help_text=_("acide docosahexaénoïque (acide gras insaturé 22:6) (g/100g)"))
     cholesterol = models.FloatField(
         default=0.0,
         verbose_name=_("cholestérol"),
@@ -212,7 +222,7 @@ class Food(CommonModel):
     selenium = models.FloatField(
         default=0.0,
         verbose_name=_("sélénium"),
-        help_text=_("sélénium (mg/100g)"))
+        help_text=_("sélénium (µg/100g)"))
     sodium = models.FloatField(
         default=0.0,
         verbose_name=_("sodium"),
@@ -236,7 +246,7 @@ class Food(CommonModel):
     vitamin_e = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine E"),
-        help_text=_("vitamine E (µg/100g)"))
+        help_text=_("vitamine E (mg/100g)"))
     vitamin_k1 = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine K1"),
@@ -248,27 +258,27 @@ class Food(CommonModel):
     vitamin_c = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine C"),
-        help_text=_("vitamine C (µg/100g)"))
+        help_text=_("vitamine C (mg/100g)"))
     vitamin_b1 = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine B1"),
-        help_text=_("vitamine B1 (thiamine) (µg/100g)"))
+        help_text=_("vitamine B1 (thiamine) (mg/100g)"))
     vitamin_b2 = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine B2"),
-        help_text=_("vitamine B2 (riboflavine) (µg/100g)"))
+        help_text=_("vitamine B2 (riboflavine) (mg/100g)"))
     vitamin_b3 = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine B3"),
-        help_text=_("vitamine B3 (niacine) (µg/100g)"))
+        help_text=_("vitamine B3 (niacine) (mg/100g)"))
     vitamin_b5 = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine B5"),
-        help_text=_("vitamine B5 (acide penthothénique) (µg/100g)"))
+        help_text=_("vitamine B5 (acide penthothénique) (mg/100g)"))
     vitamin_b6 = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine B6"),
-        help_text=_("vitamine B6 (µg/100g)"))
+        help_text=_("vitamine B6 (mg/100g)"))
     vitamin_b9 = models.FloatField(
         default=0.0,
         verbose_name=_("vitamine B9"),
@@ -278,9 +288,49 @@ class Food(CommonModel):
         verbose_name=_("vitamine B12"),
         help_text=_("vitamine B12 (µg/100g)"))
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = _("aliment")
         verbose_name_plural = _("aliments")
 
 
-MODELS = (FoodGroup, Food, )
+class Meal(CommonModel):
+    """
+    Repas
+    """
+    MEAL_TYPES = (
+        (1, _("déjeuner")),
+        (2, _("brunch")),
+        (3, _("dîner")),
+        (4, _("collation")),
+        (5, _("souper")),
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("utilisateur"))
+    date = models.DateTimeField(
+        default=now,
+        verbose_name=_("date"))
+    type = models.PositiveSmallIntegerField(
+        blank=True, null=True, choices=MEAL_TYPES,
+        verbose_name=_("type"))
+    protein = models.FloatField(
+        default=0.0,
+        verbose_name=_("protéines"))
+    carb = models.FloatField(
+        default=0.0,
+        verbose_name=_("glucides"))
+    lipid = models.FloatField(
+        default=0.0,
+        verbose_name=_("lipides"))
+
+    class Meta:
+        verbose_name = _("repas")
+        verbose_name_plural = _("repas")
+
+
+# Liste de tous les modèles connus
+MODELS = (FoodGroup, Food, Meal, )

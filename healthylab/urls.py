@@ -1,4 +1,6 @@
 # coding: utf-8
+from common.urls import urlpatterns as common_urls
+from common.api.urls import urlpatterns as common_api
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
@@ -25,19 +27,13 @@ urlpatterns = [
     url(r'^social/ ', include('social_django.urls', namespace='social')),
     # Healthy Lab
     # url(r'^$', RedirectView.as_view(pattern_name='healthyapp_index', permanent=True)),
-    url(r'^healthyapp/', include(app_urls)),
-    url(r'^api/healthyapp/', include(app_api)),
-    url(r'^healthyfood/', include(food_urls)),
-    url(r'^api/healthyfood/', include(food_api)),
+    url(r'^common/', include(common_urls, namespace='common')),
+    url(r'^api/common/', include(common_api, namespace='common-api')),
+    url(r'^healthyapp/', include(app_urls, namespace='healthyapp')),
+    url(r'^api/healthyapp/', include(app_api, namespace='healthyapp-api')),
+    url(r'^healthyfood/', include(food_urls, namespace='healthyfood')),
+    url(r'^api/healthyfood/', include(food_api, namespace='healthyfood-api')),
 ]
-
-# Common framework
-if 'common' in settings.INSTALLED_APPS:
-    from common.urls import urlpatterns as common_urls
-    from common.api.urls import urlpatterns as common_api
-    urlpatterns += [
-        url(r'^common/', include(common_urls, namespace='common')),
-        url(r'^api/common/', include(common_api, namespace='common-api'))]
 
 # Debug
 if settings.DEBUG:

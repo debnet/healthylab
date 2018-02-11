@@ -1,6 +1,11 @@
 # coding: utf-8
+from common.models import CommonModel
+from datetime import date
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.dispatch import receiver
 from django.db import models
+from django.db.models.signals import post_save
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -93,7 +98,6 @@ class Profile(AbstractUser):
         """
         if not self.birth_date:
             return None
-        from datetime import date
         today, birth_date = date.today(), self.birth_date
         return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
 
@@ -171,5 +175,32 @@ class Profile(AbstractUser):
         verbose_name_plural = _("profils")
 
 
-MODELS = (Profile, )
+class Activity(CommonModel):
+    """
+    Activité
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='activities',
+        verbose_name=_("utilisateur"))
+    date = models.DateField(
+        auto_now_add=True,
+        verbose_name=_("date"))
+    weight = models.FloatField(
+        verbose_name=_("poids"))
 
+    class Meta:
+        verbose_name = _("activité")
+        verbose_name_plural = _("activités")
+        unique_together = ('user', 'date')
+
+
+@receiver(post_save, sender=Profile)
+def create_activity(instance, **kwargs):
+    if instance.weight:
+        Activity.objects.update_or_create(
+            user=instance, date=date.today(),
+            defaults=dict(weight=instance.weight))
+
+
+# Liste de tous les modèles connus
+MODELS = (Activity, )

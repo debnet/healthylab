@@ -4,12 +4,12 @@ from django.urls import path
 from healthyapp import api, views
 
 
-urlpatterns = [
+urlpatterns = ([
     # TODO:
-]
+], 'healthyapp')
 
 # API REST
 router = api.router
-api_urlpatterns = [
+api_urlpatterns = ([
     # TODO:
-] + router.urls
+] + router.urls, 'healthyapp')

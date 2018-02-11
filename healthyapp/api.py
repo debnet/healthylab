@@ -27,7 +27,7 @@ class ProfileSerializer(CommonModelSerializer):
 SERIALIZERS_BASE.update({Profile: (ProfileSerializer, )})
 
 # Désactive les listes déroulantes sur les champs de relations
-disable_relation_fields(*MODELS)
+disable_relation_fields(Profile, *MODELS)
 
 # Création des APIs REST standard pour les modèles de cette application
-router, all_serializers, all_viewsets = create_api(*MODELS)
+router, all_serializers, all_viewsets = create_api(Profile, *MODELS)

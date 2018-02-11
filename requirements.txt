@@ -1,6 +1,6 @@
 Django==2.0.2
 Pillow==5.0.0
-common-framework==2018.1.10
+common-framework==2018.2.10
 coverage==4.5.0
 django-configurations==2.0
 django-cors-headers==2.1.0
@@ -12,7 +12,7 @@ flake8==3.5.0
 oauthlib==2.0.6
 python-dateutil==2.6.1
 pip==9.0.1
-pytz==2017.3
+pytz==2018.3
 requests==2.18.4
 setuptools==38.5.1
 social-auth-app-django==2.1.0

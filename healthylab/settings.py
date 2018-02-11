@@ -99,13 +99,6 @@ class Base(Configuration):
     # Authentication backends
     AUTHENTICATION_BACKENDS = (
         'social_core.backends.open_id.OpenIdAuth',
-        'social_core.backends.google.GoogleOpenId',
-        'social_core.backends.google.GoogleOAuth2',
-        'social_core.backends.google.GoogleOAuth',
-        'social_core.backends.facebook.FacebookAppOAuth2',
-        'social_core.backends.facebook.FacebookOAuth2',
-        'social_core.backends.instagram.InstagramOAuth2',
-        'social_core.backends.twitter.TwitterOAuth',
         'django.contrib.auth.backends.ModelBackend',
     )
 
@@ -128,7 +121,7 @@ class Base(Configuration):
 
     # Internationalization
     # https://docs.djangoproject.com/en/2.0/topics/i18n/
-    LANGUAGE_CODE = 'fr-fr'
+    LANGUAGE_CODE = 'fr'
     TIME_ZONE = 'Europe/Paris'
     USE_I18N = True
     USE_L10N = True
