@@ -327,63 +327,6 @@ class Gym(CommonModel):
         verbose_name_plural = _("salles de sport")
 
 
-class MealConsumption(CommonModel):
-    """
-    Consommation de nourriture
-    """
-    MEAL_TYPES = (
-        (1, _("déjeuner")),
-        (2, _("brunch")),
-        (3, _("dîner")),
-        (4, _("collation")),
-        (5, _("souper")),
-    )
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("utilisateur"))
-    date = models.DateField(
-        default=date.today(),
-        verbose_name=_("date"))
-    type = models.PositiveSmallIntegerField(
-        blank=True, null=True, choices=MEAL_TYPES,
-        verbose_name=_("type"))
-    protein = models.FloatField(
-        default=0.0,
-        verbose_name=_("protéines"))
-    carb = models.FloatField(
-        default=0.0,
-        verbose_name=_("glucides"))
-    lipid = models.FloatField(
-        default=0.0,
-        verbose_name=_("lipides"))
-
-    class Meta:
-        verbose_name = _("consommation de nourriture")
-        verbose_name_plural = _("consommations de nourriture")
-        unique_together = ('user', 'date', 'type')
-
-
-class WaterConsumption(CommonModel):
-    """
-    Consommation d'eau
-    """
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("utilisateur"))
-    date = models.DateField(
-        default=date.today(),
-        verbose_name=_("date"))
-    quantity = models.IntegerField(
-        default=0,
-        verbose_name=_("quantité"))
-
-    class Meta:
-        verbose_name = _("consommation d'eau")
-        verbose_name_plural = _("consommations d'eau")
-        unique_together = ('user', 'date')
-
-
 class Meal(Entity):
     """
     Repas
@@ -427,5 +370,69 @@ class Meal(Entity):
         verbose_name_plural = _("repas")
 
 
+class MealConsumption(CommonModel):
+    """
+    Consommation de nourriture
+    """
+    MEAL_TYPES = (
+        (1, _("déjeuner")),
+        (2, _("brunch")),
+        (3, _("dîner")),
+        (4, _("collation")),
+        (5, _("souper")),
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("utilisateur"))
+    date = models.DateField(
+        default=date.today(),
+        verbose_name=_("date"))
+    type = models.PositiveSmallIntegerField(
+        blank=True, null=True, choices=MEAL_TYPES,
+        verbose_name=_("type"))
+    protein = models.FloatField(
+        default=0.0,
+        verbose_name=_("protéines"))
+    carb = models.FloatField(
+        default=0.0,
+        verbose_name=_("glucides"))
+    lipid = models.FloatField(
+        default=0.0,
+        verbose_name=_("lipides"))
+
+    class Meta:
+        verbose_name = _("consommation de nourriture")
+        verbose_name_plural = _("consommations de nourriture")
+        unique_together = ('user', 'date', 'type')
+
+
+class Order(CommonModel):
+
+    class Meta:
+        verbose_name = _("commande")
+        verbose_name_plural = _("commandes")
+
+
+class WaterConsumption(CommonModel):
+    """
+    Consommation d'eau
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("utilisateur"))
+    date = models.DateField(
+        default=date.today(),
+        verbose_name=_("date"))
+    quantity = models.IntegerField(
+        default=0,
+        verbose_name=_("quantité"))
+
+    class Meta:
+        verbose_name = _("consommation d'eau")
+        verbose_name_plural = _("consommations d'eau")
+        unique_together = ('user', 'date')
+
+
 # Liste de tous les modèles connus
-MODELS = (FoodGroup, Food, Gym, MealConsumption, WaterConsumption, Meal, )
+MODELS = (FoodGroup, Food, Gym, Meal, MealConsumption, WaterConsumption, )
