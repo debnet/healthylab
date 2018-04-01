@@ -296,6 +296,50 @@ class Food(CommonModel):
         verbose_name_plural = _("aliments")
 
 
+class Gym(CommonModel):
+    """
+    Salle de sport
+    """
+    name = models.CharField(
+        max_length=100,
+        verbose_name=_("nom")
+    )
+    adress = models.CharField(
+        max_length=100,
+        verbose_name=_("adresse")
+    )
+    coordinates = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name=_("coordonnées")
+    )
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name=_("téléphone")
+    )
+    mail = models.EmailField(
+        blank=True,
+        null=True,
+        verbose_name=_("e-mail")
+    )
+    delivery_time = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("temps de livraison (en minutes)")
+    )
+    active = models.BooleanField(
+        default=True,
+        verbose_name=_("actif")
+    )
+
+    class Meta:
+        verbose_name = _("salle de sport")
+        verbose_name_plural = _("salles de sport")
+
+
 class Meal(CommonModel):
     """
     Repas
@@ -333,4 +377,4 @@ class Meal(CommonModel):
 
 
 # Liste de tous les modèles connus
-MODELS = (FoodGroup, Food, Meal, )
+MODELS = (FoodGroup, Food, Gym, Meal, )
