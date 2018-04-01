@@ -12,10 +12,11 @@ class Command(BaseCommand):
     help = _("Import du fichier de table de composition nutritionnelle")
 
     def add_arguments(self, parser):
-        parser.add_argument('fichier', type=str, help=_("Fichier à importer (au format CSV)"))
+        parser.add_argument('--fichier', type=str, help=_("Fichier à importer (au format CSV)"))
         parser.add_argument('--no-headers', action='store_false', dest='headers', help=_("Fichier sans entête"))
 
     def handle(self, file=None, headers=True, *args, **options):
+        file = file or 'healthyfood/docs/ciqual_2017.csv'
         with open(file, 'r', encoding='utf8') as file:
             reader = csv.reader(file, delimiter=',')
             with transaction.atomic():

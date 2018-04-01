@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
 
-class HealthyappConfig(AppConfig):
+class HealthyAppConfig(AppConfig):
     name = 'healthyapp'
+    verbose_name = "Application"

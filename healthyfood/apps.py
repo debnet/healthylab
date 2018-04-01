@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
 
-class HealthyfoodConfig(AppConfig):
+class HealthyFoodConfig(AppConfig):
     name = 'healthyfood'
+    verbose_name = "Food"

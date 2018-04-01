@@ -210,3 +210,7 @@ class Base(Configuration):
         (0, 0): 'warning',
         (0, 1): 'danger',
     }
+
+    # Prix de base
+    BASE_PRICE = '11.90'
+    GOLD_PRICE = '09.90'

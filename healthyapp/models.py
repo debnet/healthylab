@@ -90,6 +90,12 @@ class Profile(AbstractUser):
     progress = models.FloatField(
         blank=True, null=True, choices=PROGRESSES,
         verbose_name=_("progression"))
+    points = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_("points"))
+    balance = models.DecimalField(
+        default=0, max_digits=5, decimal_places=2,
+        verbose_name=_("solde"))
 
     @property
     def age(self):
