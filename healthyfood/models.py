@@ -1,8 +1,8 @@
 # coding: utf-8
-from common.models import CommonModel
+from common.models import CommonModel, Entity
+from datetime import date
 from django.conf import settings
 from django.db import models
-from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -302,47 +302,34 @@ class Gym(CommonModel):
     """
     name = models.CharField(
         max_length=100,
-        verbose_name=_("nom")
-    )
+        verbose_name=_("nom"))
     adress = models.CharField(
         max_length=100,
-        verbose_name=_("adresse")
-    )
+        verbose_name=_("adresse"))
     coordinates = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        verbose_name=_("coordonnées")
-    )
+        max_length=50, blank=True,
+        verbose_name=_("coordonnées"))
     phone = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        verbose_name=_("téléphone")
-    )
+        max_length=20, blank=True,
+        verbose_name=_("téléphone"))
     mail = models.EmailField(
         blank=True,
-        null=True,
-        verbose_name=_("e-mail")
-    )
+        verbose_name=_("e-mail"))
     delivery_time = models.PositiveSmallIntegerField(
-        blank=True,
-        null=True,
-        verbose_name=_("temps de livraison (en minutes)")
-    )
+        blank=True, null=True,
+        verbose_name=_("temps de livraison"))
     active = models.BooleanField(
         default=True,
-        verbose_name=_("actif")
-    )
+        verbose_name=_("actif"))
 
     class Meta:
         verbose_name = _("salle de sport")
         verbose_name_plural = _("salles de sport")
 
 
-class Meal(CommonModel):
+class MealConsumption(CommonModel):
     """
-    Repas
+    Consommation de nourriture
     """
     MEAL_TYPES = (
         (1, _("déjeuner")),
@@ -355,8 +342,8 @@ class Meal(CommonModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         verbose_name=_("utilisateur"))
-    date = models.DateTimeField(
-        default=now,
+    date = models.DateField(
+        default=date.today(),
         verbose_name=_("date"))
     type = models.PositiveSmallIntegerField(
         blank=True, null=True, choices=MEAL_TYPES,
@@ -372,9 +359,73 @@ class Meal(CommonModel):
         verbose_name=_("lipides"))
 
     class Meta:
+        verbose_name = _("consommation de nourriture")
+        verbose_name_plural = _("consommations de nourriture")
+        unique_together = ('user', 'date', 'type')
+
+
+class WaterConsumption(CommonModel):
+    """
+    Consommation d'eau
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("utilisateur"))
+    date = models.DateField(
+        default=date.today(),
+        verbose_name=_("date"))
+    quantity = models.IntegerField(
+        default=0,
+        verbose_name=_("quantité"))
+
+    class Meta:
+        verbose_name = _("consommation d'eau")
+        verbose_name_plural = _("consommations d'eau")
+        unique_together = ('user', 'date')
+
+
+class Meal(Entity):
+    """
+    Repas
+    """
+    name = models.CharField(
+        max_length=100,
+        verbose_name=_("nom"))
+    description = models.TextField(
+        blank=True,
+        verbose_name=_("description"))
+    image = models.ImageField(
+        blank=True, upload_to='meals',
+        verbose_name=_("image"))
+    energy_kcal = models.FloatField(
+        default=0.0,
+        verbose_name=_("énergie"))
+    protein = models.FloatField(
+        default=0.0,
+        verbose_name=_("protéines"))
+    carb = models.FloatField(
+        default=0.0,
+        verbose_name=_("glucides"))
+    lipid = models.FloatField(
+        default=0.0,
+        verbose_name=_("lipides"))
+    active = models.BooleanField(
+        default=True,
+        verbose_name=_("actif"))
+    quantity_low = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_("perte de poids"))
+    quantity_base = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_("stabilisation de poids"))
+    quantity_high = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_("prise de poids"))
+
+    class Meta:
         verbose_name = _("repas")
         verbose_name_plural = _("repas")
 
 
 # Liste de tous les modèles connus
-MODELS = (FoodGroup, Food, Gym, Meal, )
+MODELS = (FoodGroup, Food, Gym, MealConsumption, WaterConsumption, Meal, )
