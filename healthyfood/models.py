@@ -407,11 +407,93 @@ class MealConsumption(CommonModel):
         unique_together = ('user', 'date', 'type')
 
 
+class MealReview(CommonModel):
+    NOTES = (
+        (0, _("zéro")),
+        (1, _("un")),
+        (2, _("deux")),
+        (3, _("trois")),
+        (4, _("quatre")),
+        (5, _("cinq")),
+    )
+    meal = models.ForeignKey(
+        'Meal', on_delete=models.CASCADE, related_name='avis',
+        verbose_name=_("plat"))
+    message = models.TextField(
+        blank=True,
+        verbose_name=_("message")
+    )
+    note = models.PositiveSmallIntegerField(
+        choices=NOTES, default=3,
+        verbose_name=_("note")
+    )
+
+    class Meta:
+        verbose_name = _("avis plat")
+        verbose_name_plural = _("avis plat")
+
+
 class Order(CommonModel):
+    STATUS_PREPARATION = 1
+    STATUS_DELIVERING = 2
+    STATUS_DELIVERED = 3
+    STATUS = (
+        (STATUS_PREPARATION, _("en préparation")),
+        (STATUS_DELIVERING, _("en cours de livraison")),
+        (STATUS_DELIVERED, _("livré")),
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='commandes',
+        verbose_name=_("utilisateur"))
+    date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("date"))
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS, default=STATUS_PREPARATION,
+        verbose_name=_("status"))
+
+    @property
+    def price(self):
+        return sum(item.price for item in self.items)
 
     class Meta:
         verbose_name = _("commande")
         verbose_name_plural = _("commandes")
+
+
+class OrderItem(CommonModel):
+    TYPE_LOW = 'L'
+    TYPE_MEDIUM = 'M'
+    TYPE_HIGH = 'H'
+    TYPES = (
+        (TYPE_LOW, _("perte de poids")),
+        (TYPE_MEDIUM, _("stabilisation")),
+        (TYPE_HIGH, _("prise de poids"))
+    )
+
+    order = models.ForeignKey(
+        'Order', on_delete=models.CASCADE, related_name='items',
+        verbose_name=_("commande")
+    )
+    meal = models.ForeignKey(
+        'Meal', on_delete=models.CASCADE, related_name='+',
+        verbose_name=_("plat")
+    )
+    type = models.CharField(
+        max_length=1, choices=TYPES, blank=True,
+        verbose_name=_("type")
+    )
+    quantity = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name=_("quantité"))
+
+    @property
+    def price(self):
+        return self.meal.price * self.quantity
+
+    class Meta:
+        verbose_name = _("élément de commande")
+        verbose_name_plural = _("éléments de commande")
 
 
 class WaterConsumption(CommonModel):
@@ -435,4 +517,4 @@ class WaterConsumption(CommonModel):
 
 
 # Liste de tous les modèles connus
-MODELS = (FoodGroup, Food, Gym, Meal, MealConsumption, WaterConsumption, )
+MODELS = (FoodGroup, Food, Gym, Meal, MealConsumption, MealReview, Order, OrderItem, WaterConsumption, )
