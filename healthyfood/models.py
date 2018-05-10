@@ -554,6 +554,9 @@ class Order(CommonModel):
     def price(self):
         return sum(item.price for item in self.items.all())
 
+    def __str__(self):
+        return f'{self.date.day}/{self.date.month}/{self.date.year} - {self.price} €'
+
     class Meta:
         verbose_name = _("commande")
         verbose_name_plural = _("commandes")
@@ -651,6 +654,7 @@ class Message(models.Model):
     to_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         verbose_name=_("destinataire"), related_name='received_messages')
+    message = models.TextField(blank=True, verbose_name=_("message"))
     date = models.DateTimeField(auto_now=True, verbose_name=_("date"))
     is_read = models.BooleanField(default=False, verbose_name=_("lu"))
 
