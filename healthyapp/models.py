@@ -37,7 +37,7 @@ class Profile(AbstractUser):
     )
     OBJECTIVES = (
         (-1, _("perdre du poids")),
-        (+0, _("maintien du poids")),
+        (+0, _("maintenir le poids")),
         (+1, _("prendre du poids")),
     )
     PROGRESSES = (

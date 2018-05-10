@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('objective_weight', models.FloatField(blank=True, null=True, verbose_name='poids souhaité')),
                 ('height', models.SmallIntegerField(blank=True, null=True, verbose_name='taille')),
                 ('activity', models.PositiveSmallIntegerField(blank=True, choices=[(1, 'sédentaire'), (2, 'légèrement actif'), (3, 'actif'), (4, 'très actif'), (5, 'extrêmement actif')], null=True, verbose_name='activité')),
-                ('objective', models.SmallIntegerField(blank=True, choices=[(-1, 'perdre du poids'), (0, 'maintien du poids'), (1, 'prendre du poids')], null=True, verbose_name='objectif')),
+                ('objective', models.SmallIntegerField(blank=True, choices=[(-1, 'perdre du poids'), (0, 'maintenir le poids'), (1, 'prendre du poids')], null=True, verbose_name='objectif')),
                 ('progress', models.FloatField(blank=True, choices=[(0.25, '0,25 kg / semaine'), (0.5, '0,50 kg / semaine'), (1.0, '1,00 kg / semaine')], null=True, verbose_name='progression')),
                 ('points', models.PositiveSmallIntegerField(default=0, verbose_name='points')),
                 ('balance', models.DecimalField(decimal_places=2, default=0, max_digits=5, verbose_name='solde')),
