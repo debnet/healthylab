@@ -1,7 +1,5 @@
 # coding: utf-8
-from django.urls import path
-
-from healthyapp import api, views
+from healthyapp import api
 
 
 urlpatterns = ([

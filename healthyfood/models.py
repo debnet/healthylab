@@ -602,5 +602,51 @@ class WaterConsumption(CommonModel):
         unique_together = ('user', 'date')
 
 
+class Relation(models.Model):
+    """
+    Relation
+    """
+    TYPE_COACH = 'C'
+    TYPE_STUDENT = 'S'
+    TYPE_FRIEND = 'F'
+    TYPES = (
+        (TYPE_COACH, _("coach")),
+        (TYPE_STUDENT, _("élève")),
+        (TYPE_FRIEND, _("ami"))
+    )
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("source"), related_name='source')
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("cible"), related_name='target')
+    type = models.CharField(max_length=1, choices=TYPES, verbose_name=_("type"))
+    date = models.DateTimeField(auto_now=True, verbose_name=_("date"))
+    valid = models.BooleanField(default=False, verbose_name=_("validée"))
+
+    class Meta:
+        verbose_name = _("relation")
+        verbose_name_plural = _("relations")
+
+
+class Message(models.Model):
+    """
+    Message
+    """
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("expediteur"), related_name='sent_messages')
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("destinataire"), related_name='received_messages')
+    date = models.DateTimeField(auto_now=True, verbose_name=_("date"))
+    is_read = models.BooleanField(default=False, verbose_name=_("lu"))
+
+    class Meta:
+        verbose_name = _("message")
+        verbose_name_plural = _("messages")
+
+
 # Liste de tous les modèles connus
-MODELS = (FoodGroup, Food, Gym, Meal, MealConsumption, MealPortion, MealReview, Order, OrderItem, WaterConsumption, )
+MODELS = (FoodGroup, Food, Gym, Meal, MealConsumption, MealPortion, MealReview, Message, Order, OrderItem,
+          Relation, WaterConsumption, )
