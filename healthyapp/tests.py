@@ -8,4 +8,4 @@ RECIPES = {}
 
 # Tests automatisées pour tous les modèles liés à une API REST
 for model in (Profile, ) + MODELS:
-    create_api_test_class(model, data=RECIPES.get(model, None))
+    create_api_test_class(model, namespace='healthyapp-api', data=RECIPES.get(model, None))

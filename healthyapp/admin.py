@@ -22,6 +22,7 @@ class ProfileAdmin(UserAdmin):
             'activity',
             'objective',
             'progress',
+            'status',
         )}),
     )
     filter_horizontal = ('groups', 'user_permissions', )

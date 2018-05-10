@@ -344,7 +344,7 @@ class Meal(Entity):
         blank=True,
         verbose_name=_("description"))
     image = models.ImageField(
-        blank=True, upload_to='meals',
+        blank=True, null=True, upload_to='meals',
         verbose_name=_("image"))
     energy = models.FloatField(
         default=0.0,
@@ -363,13 +363,16 @@ class Meal(Entity):
         verbose_name=_("actif"))
     quantity_low = models.PositiveSmallIntegerField(
         default=0,
-        verbose_name=_("perte de poids"))
+        verbose_name=_("quantité basse"),
+        help_text=_("quantité (en g.) pour la perte de poids"))
     quantity_base = models.PositiveSmallIntegerField(
         default=0,
-        verbose_name=_("maintien de poids"))
+        verbose_name=_("quantité moyenne"),
+        help_text=_("quantité (en g.) pour le maintien du poids"))
     quantity_high = models.PositiveSmallIntegerField(
         default=0,
-        verbose_name=_("prise de poids"))
+        verbose_name=_("quantité elevée"),
+        help_text=_("quantité (en g.) pour la prise de poids"))
     price = models.DecimalField(
         default=settings.BASE_PRICE, max_digits=4, decimal_places=2,
         verbose_name=_("prix"))
@@ -381,12 +384,21 @@ class Meal(Entity):
                 setattr(self, name, getattr(self, name) + getattr(portion, name))
         self.save()
 
+    def _get_value(self, quantity, energy):
+        return getattr(self, energy, 0) * (getattr(self, quantity, 0) / 100.0)
+
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name = _("repas")
         verbose_name_plural = _("repas")
+
+
+# Récupération des valeurs nutritionnelles par quantité
+for quantity in ('low', 'base', 'high'):
+    for energy in ('energy', 'protein', 'carb', 'lipid'):
+        setattr(Meal, f'{energy}_{quantity}', property(lambda s, q=quantity, e=energy: s._get_value(q, e)))
 
 
 class MealConsumption(CommonModel):
@@ -540,7 +552,7 @@ class Order(CommonModel):
 
     @property
     def price(self):
-        return sum(item.price for item in self.items)
+        return sum(item.price for item in self.items.all())
 
     class Meta:
         verbose_name = _("commande")
