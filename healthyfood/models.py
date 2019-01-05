@@ -18,16 +18,19 @@ class FoodGroup(CommonModel):
 
     code = models.CharField(
         max_length=6, primary_key=True,
-        verbose_name=_("code"))
+        verbose_name=_("code"),
+        help_text=_("code interne utilisé par le fichier SIQUAL."))
     name = models.CharField(
         max_length=1000,
         verbose_name=_("nom"))
     level = models.PositiveSmallIntegerField(
         default=1, choices=LEVELS,
-        verbose_name=_("niveau"))
+        verbose_name=_("niveau"),
+        help_text=_("niveau de regroupement (groupe, sous-groupe ou moins)"))
     parent = models.ForeignKey(
         'self', null=True, blank=True, on_delete=models.CASCADE,
-        verbose_name=_("parent"), related_name='subgroups')
+        verbose_name=_("parent"), related_name='subgroups',
+        help_text=_("groupe parent si il s'agît d'un sous-groupe"))
 
     def __str__(self):
         return self.name
@@ -43,13 +46,15 @@ class Food(CommonModel):
     """
     code = models.SmallIntegerField(
         primary_key=True,
-        verbose_name=_("code"))
+        verbose_name=_("code"),
+        help_text=_("code interne utilisé par le fichier SIQUAL"))
     name = models.CharField(
         max_length=1000,
         verbose_name=_("nom"))
     group = models.ForeignKey(
         'FoodGroup', on_delete=models.CASCADE,
-        verbose_name=_("groupe"), related_name='foods')
+        verbose_name=_("groupe"), related_name='foods',
+        help_text=_("groupe auquel appartient cet aliment"))
     energy_eu = models.FloatField(
         default=0.0,
         verbose_name=_("énergie (UE)"),
@@ -306,8 +311,8 @@ class Gym(CommonModel):
     name = models.CharField(
         max_length=100,
         verbose_name=_("nom"))
-    adress = models.CharField(
-        max_length=100,
+    adress = models.TextField(
+        blank=True,
         verbose_name=_("adresse"))
     coordinates = models.CharField(
         max_length=50, blank=True,
@@ -320,10 +325,12 @@ class Gym(CommonModel):
         verbose_name=_("e-mail"))
     delivery_time = models.PositiveSmallIntegerField(
         blank=True, null=True,
-        verbose_name=_("temps de livraison"))
+        verbose_name=_("temps de livraison"),
+        help_text=_("temps de livraison (en mn) estimé jusqu'à cette salle de sport"))
     active = models.BooleanField(
         default=True,
-        verbose_name=_("actif"))
+        verbose_name=_("actif"),
+        help_text=_("salle de sport activée et livrable"))
 
     def __str__(self):
         return self.name
@@ -348,34 +355,48 @@ class Meal(Entity):
         verbose_name=_("image"))
     energy = models.FloatField(
         default=0.0,
-        verbose_name=_("énergie"))
+        verbose_name=_("énergie"),
+        help_text=_("énergie (en kcal/100g), peut être recalculé sur la base des aliments constituants"))
     protein = models.FloatField(
         default=0.0,
-        verbose_name=_("protéines"))
+        verbose_name=_("protéines"),
+        help_text=_("protéines (en g/100g), peut être recalculé sur la base des aliments constituants"))
     carb = models.FloatField(
         default=0.0,
-        verbose_name=_("glucides"))
+        verbose_name=_("glucides"),
+        help_text=_("glucides (en g/100g), peut être recalculé sur la base des aliments constituants"))
     lipid = models.FloatField(
         default=0.0,
-        verbose_name=_("lipides"))
+        verbose_name=_("lipides"),
+        help_text=_("lipides (en g/100g), peut être recalculé sur la base des aliments constituants"))
     active = models.BooleanField(
         default=True,
-        verbose_name=_("actif"))
+        verbose_name=_("actif"),
+        help_text=_("actif à la vente"))
     quantity_low = models.PositiveSmallIntegerField(
         default=0,
         verbose_name=_("quantité basse"),
-        help_text=_("quantité (en g.) pour la perte de poids"))
+        help_text=_("quantité nécessaire (en g.) pour une perte de poids"))
     quantity_base = models.PositiveSmallIntegerField(
         default=0,
         verbose_name=_("quantité moyenne"),
-        help_text=_("quantité (en g.) pour le maintien du poids"))
+        help_text=_("quantité nécessaire (en g.) pour un maintien du poids"))
     quantity_high = models.PositiveSmallIntegerField(
         default=0,
         verbose_name=_("quantité elevée"),
-        help_text=_("quantité (en g.) pour la prise de poids"))
-    price = models.DecimalField(
-        default=settings.BASE_PRICE, max_digits=4, decimal_places=2,
-        verbose_name=_("prix"))
+        help_text=_("quantité nécessaire (en g.) pour une prise de poids"))
+    price_low = models.DecimalField(
+        default='0', max_digits=4, decimal_places=2,
+        verbose_name=_("prix bas"),
+        help_text=_("prix (en euros) de ce plat avec la quantité nécessaire à une perte de poids"))
+    price_base = models.DecimalField(
+        default='0', max_digits=4, decimal_places=2,
+        verbose_name=_("prix de base"),
+        help_text=_("prix (en euros) de ce plat avec la quantité nécessaire à un maintien de poids"))
+    price_high = models.DecimalField(
+        default='0', max_digits=4, decimal_places=2,
+        verbose_name=_("prix haut"),
+        help_text=_("prix (en euros) de ce plat avec la quantité nécessaire à une prise de poids"))
 
     def recalculate(self):
         self.energy = self.protein = self.carb = self.lipid = 0
@@ -407,53 +428,61 @@ class MealConsumption(CommonModel):
     """
     MEAL_TYPES = (
         (1, _("déjeuner")),
-        (2, _("brunch")),
-        (3, _("dîner")),
-        (4, _("collation")),
-        (5, _("souper")),
+        (2, _("dîner")),
+        (3, _("collation")),
+        (4, _("souper")),
     )
 
     name = models.CharField(
         max_length=100, blank=True,
         verbose_name=_("nom"))
     meal = models.ForeignKey(
-        'Meal', blank=True, null=True, on_delete=models.SET_NULL,
-        verbose_name=_("repas"), related_name='+')
+        'Meal', on_delete=models.CASCADE,
+        verbose_name=_("repas"), related_name='+',
+        help_text=_("repas disponible à la vente ou enregistré par un utilisateur"))
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("utilisateur"), related_name='meals')
+        verbose_name=_("utilisateur"), related_name='meals',
+        help_text=_("utilisateur concerné"))
     date = models.DateField(
         default=date.today,
-        verbose_name=_("date"))
+        verbose_name=_("date"),
+        help_text=_("date de la prise de repas"))
     type = models.PositiveSmallIntegerField(
         blank=True, null=True, choices=MEAL_TYPES,
-        verbose_name=_("type"))
+        verbose_name=_("type"),
+        help_text=_("type ou moment de la prise de repas"))
     energy = models.FloatField(
         default=0.0,
-        verbose_name=_("énergie"))
+        verbose_name=_("énergie"),
+        help_text=_("énergie (en kcal/100g) du repas"))
     protein = models.FloatField(
         default=0.0,
-        verbose_name=_("protéines"))
+        verbose_name=_("protéines"),
+        help_text=_("protéines (en g/100g) du repas"))
     carb = models.FloatField(
         default=0.0,
-        verbose_name=_("glucides"))
+        verbose_name=_("glucides"),
+        help_text=_("glucides (en g/100g) du repas"))
     lipid = models.FloatField(
         default=0.0,
-        verbose_name=_("lipides"))
+        verbose_name=_("lipides"),
+        help_text=_("lipides (en g/100g) du repas"))
 
     def recalculate(self):
         self.energy = self.protein = self.carb = self.lipid = 0
-        for portion in self.portions.select_related('food').all():
-            for name in ('energy', 'protein', 'carb', 'lipid'):
-                setattr(self, name, getattr(self, name) + getattr(portion, name))
+        if self.meal:
+            for portion in self.meal.portions.select_related('food').all():
+                for name in ('energy', 'protein', 'carb', 'lipid'):
+                    setattr(self, name, getattr(self, name) + getattr(portion, name))
         self.save()
 
     def __str__(self):
         return self.name or str(self.meal)
 
     class Meta:
-        verbose_name = _("consommation de nourriture")
-        verbose_name_plural = _("consommations de nourriture")
+        verbose_name = _("prise de repas")
+        verbose_name_plural = _("prise de repas")
         unique_together = ('user', 'date', 'type')
 
 
@@ -462,17 +491,17 @@ class MealPortion(CommonModel):
     Portion
     """
     meal = models.ForeignKey(
-        'Meal', blank=True, null=True, on_delete=models.CASCADE,
-        verbose_name=_("repas"), related_name='portions')
-    consumption = models.ForeignKey(
-        'MealConsumption', blank=True, null=True, on_delete=models.CASCADE,
-        verbose_name=_("consommation"), related_name='portions')
+        'Meal', on_delete=models.CASCADE,
+        verbose_name=_("repas"), related_name='portions',
+        help_text=_("repas concerné"))
     food = models.ForeignKey(
         'Food', on_delete=models.CASCADE,
-        verbose_name=_("ingrédient"), related_name='+')
+        verbose_name=_("aliment"), related_name='+',
+        help_text=_("ingrédient constituant depuis le fichier SIQUAL"))
     quantity = models.PositiveSmallIntegerField(
         default=0,
-        verbose_name=_("quantité"))
+        verbose_name=_("quantité"),
+        help_text=_("(en g)"))
 
     @property
     def energy(self):
@@ -491,8 +520,8 @@ class MealPortion(CommonModel):
         return (self.food.lipid * self.quantity) / 100.0
 
     class Meta:
-        verbose_name = _("portion")
-        verbose_name_plural = _("portions")
+        verbose_name = _("ingrédient")
+        verbose_name_plural = _("ingrédients")
 
 
 class MealReview(CommonModel):
@@ -510,16 +539,20 @@ class MealReview(CommonModel):
 
     meal = models.ForeignKey(
         'Meal', on_delete=models.CASCADE,
-        verbose_name=_("plat"), related_name='reviews')
+        verbose_name=_("plat"), related_name='reviews',
+        help_text=_("repas concerné"))
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("utilisateur"), related_name='reviews')
+        verbose_name=_("utilisateur"), related_name='reviews',
+        help_text=_("utilisateur concerné"))
     message = models.TextField(
         blank=True,
-        verbose_name=_("message"))
+        verbose_name=_("commentaire"),
+        help_text=_("commentaire de l'utilisateur (non obligatoire)"))
     note = models.PositiveSmallIntegerField(
         choices=NOTES, default=3,
-        verbose_name=_("note"))
+        verbose_name=_("note"),
+        help_text=_("note du repas (obligatoire)"))
 
     class Meta:
         verbose_name = _("avis")
@@ -542,16 +575,23 @@ class Order(CommonModel):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("utilisateur"), related_name='orders')
+        verbose_name=_("utilisateur"), related_name='orders',
+        help_text=_("utilisateur concerné"))
     date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_("date"))
+        verbose_name=_("date"),
+        help_text=_("date et heure de la commande"))
     status = models.PositiveSmallIntegerField(
         choices=STATUS, default=STATUS_PREPARATION,
-        verbose_name=_("status"))
+        verbose_name=_("statut"),
+        help_text=_("statut de la commande"))
+    price = models.DecimalField(
+        default='0', max_digits=4, decimal_places=2,
+        verbose_name=_("prix"),
+        help_text=_("prix (en euros) de la commande"))
 
     @property
-    def price(self):
+    def calculated_price(self):
         return sum(item.price for item in self.items.all())
 
     class Meta:
@@ -563,35 +603,43 @@ class OrderItem(CommonModel):
     """
     Elément de commande
     """
-    TYPE_LOW = 'L'
-    TYPE_MEDIUM = 'M'
-    TYPE_HIGH = 'H'
+    TYPE_LOW = 'low'
+    TYPE_BASE = 'base'
+    TYPE_HIGH = 'high'
     TYPES = (
         (TYPE_LOW, _("perte de poids")),
-        (TYPE_MEDIUM, _("stabilisation")),
+        (TYPE_BASE, _("maintien de poids")),
         (TYPE_HIGH, _("prise de poids"))
     )
 
     order = models.ForeignKey(
         'Order', on_delete=models.CASCADE, related_name='items',
-        verbose_name=_("commande"))
+        verbose_name=_("commande"),
+        help_text=_("commande concernée"))
     meal = models.ForeignKey(
         'Meal', on_delete=models.CASCADE, related_name='+',
-        verbose_name=_("plat"))
+        verbose_name=_("repas"),
+        help_text=_("repas concerné"))
     type = models.CharField(
-        max_length=1, choices=TYPES, blank=True,
-        verbose_name=_("type"))
+        max_length=4, choices=TYPES, blank=True,
+        verbose_name=_("type"),
+        help_text=_("type de repas choisi selon l'objectif de l'utilisateur"))
     quantity = models.PositiveSmallIntegerField(
         default=1,
-        verbose_name=_("quantité"))
+        verbose_name=_("quantité"),
+        help_text=_("nombre de repas commandés"))
+    price = models.DecimalField(
+        default='0', max_digits=4, decimal_places=2,
+        verbose_name=_("prix"),
+        help_text=_("prix (en euros) de la commande"))
 
     @property
-    def price(self):
-        return self.meal.price * self.quantity
+    def calculated_price(self):
+        return getattr(self.meal, 'price_' + self.type) * self.quantity
 
     class Meta:
-        verbose_name = _("élément de commande")
-        verbose_name_plural = _("éléments de commande")
+        verbose_name = _("sous-commande")
+        verbose_name_plural = _("sous-commandes")
 
 
 class WaterConsumption(CommonModel):
@@ -600,13 +648,16 @@ class WaterConsumption(CommonModel):
     """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("utilisateur"), related_name='+')
+        verbose_name=_("utilisateur"), related_name='+',
+        help_text=_("utilisateur concerné"))
     date = models.DateField(
         default=date.today,
-        verbose_name=_("date"))
-    quantity = models.IntegerField(
+        verbose_name=_("date"),
+        help_text=_("date de la consommation d'eau"))
+    quantity = models.FloatField(
         default=0,
-        verbose_name=_("quantité"))
+        verbose_name=_("quantité"),
+        help_text=_("(en litres)"))
 
     class Meta:
         verbose_name = _("consommation d'eau")
@@ -614,51 +665,6 @@ class WaterConsumption(CommonModel):
         unique_together = ('user', 'date')
 
 
-class Relation(models.Model):
-    """
-    Relation
-    """
-    TYPE_COACH = 'C'
-    TYPE_STUDENT = 'S'
-    TYPE_FRIEND = 'F'
-    TYPES = (
-        (TYPE_COACH, _("coach")),
-        (TYPE_STUDENT, _("élève")),
-        (TYPE_FRIEND, _("ami"))
-    )
-    from_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("source"), related_name='source')
-    to_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("cible"), related_name='target')
-    type = models.CharField(max_length=1, choices=TYPES, verbose_name=_("type"))
-    date = models.DateTimeField(auto_now=True, verbose_name=_("date"))
-    valid = models.BooleanField(default=False, verbose_name=_("validée"))
-
-    class Meta:
-        verbose_name = _("relation")
-        verbose_name_plural = _("relations")
-
-
-class Message(models.Model):
-    """
-    Message
-    """
-    from_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("expediteur"), related_name='sent_messages')
-    to_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        verbose_name=_("destinataire"), related_name='received_messages')
-    date = models.DateTimeField(auto_now=True, verbose_name=_("date"))
-    is_read = models.BooleanField(default=False, verbose_name=_("lu"))
-
-    class Meta:
-        verbose_name = _("message")
-        verbose_name_plural = _("messages")
-
-
 # Liste de tous les modèles connus
-MODELS = (FoodGroup, Food, Gym, Meal, MealConsumption, MealPortion, MealReview, Message, Order, OrderItem,
-          Relation, WaterConsumption, )
+MODELS = (FoodGroup, Food, Gym, Meal, MealConsumption, MealPortion,
+          MealReview, Order, OrderItem, WaterConsumption, )

@@ -46,9 +46,9 @@ class Profile(AbstractUser):
         (1.00, _("1,00 kg / semaine")),
     )
     STATUS = (
-        (0, _("Basic")),
-        (1, _("Silver")),
-        (2, _("Gold")),
+        (0, _("Standard")),
+        (1, _("Argent")),
+        (2, _("Or")),
     )
     BODY_MASS = (
         (0.0, 16.5, _("dénutrition")),
@@ -74,37 +74,48 @@ class Profile(AbstractUser):
 
     gender = models.CharField(
         max_length=1, blank=True, null=True, choices=GENDERS,
-        verbose_name=_("Sexe"))
+        verbose_name=_("Sexe"),
+        help_text=_("le sexe influence le calcul de l'indice de masse grasse et du poids idéal"))
     birth_date = models.DateField(
         blank=True, null=True,
-        verbose_name=_("date de naissance"))
+        verbose_name=_("date de naissance"),
+        help_text=_("l'âge influence le calcul de l'indice de masse grasse et du métabolisme de base"))
     weight = models.FloatField(
         blank=True, null=True,
-        verbose_name=_("poids actuel"))
+        verbose_name=_("poids actuel"),
+        help_text=_("(en kg)"))
     objective_weight = models.FloatField(
         blank=True, null=True,
-        verbose_name=_("poids souhaité"))
+        verbose_name=_("poids souhaité"),
+        help_text=_("(en kg)"))
     height = models.SmallIntegerField(
         blank=True, null=True,
-        verbose_name=_("taille"))
+        verbose_name=_("taille"),
+        help_text=_("(en cm)"))
     activity = models.PositiveSmallIntegerField(
         blank=True, null=True, choices=ACTIVITIES,
-        verbose_name=_("activité"))
+        verbose_name=_("activité"),
+        help_text=_("le niveau d'activité physique influence le calcul du métabolisme de base"))
     objective = models.SmallIntegerField(
         blank=True, null=True, choices=OBJECTIVES,
-        verbose_name=_("objectif"))
+        verbose_name=_("objectif"),
+        help_text=_("l'objectif permet d'adapter la quantité des plats et de l'activité physique"))
     progress = models.FloatField(
         blank=True, null=True, choices=PROGRESSES,
-        verbose_name=_("progression"))
+        verbose_name=_("progression"),
+        help_text=_("la progression du poids est fonction de l'objectif et permet d'adapter les quantités"))
     points = models.PositiveSmallIntegerField(
         default=0,
-        verbose_name=_("points"))
+        verbose_name=_("points"),
+        help_text=_("points de fidélité accumulés"))
     balance = models.DecimalField(
         default=0, max_digits=5, decimal_places=2,
-        verbose_name=_("solde"))
+        verbose_name=_("solde"),
+        help_text=_("solde (eu euros) approvisionné sur le compte"))
     status = models.PositiveSmallIntegerField(
         default=0, choices=STATUS,
-        verbose_name=_("statut"))
+        verbose_name=_("statut"),
+        help_text=_("niveau de fidélité du compte"))
 
     @property
     def age(self):
@@ -195,13 +206,15 @@ class WeightHistory(CommonModel):
     Historique du poids
     """
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='histories',
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='weight_history',
         verbose_name=_("utilisateur"))
     date = models.DateField(
         auto_now_add=True,
-        verbose_name=_("date"))
+        verbose_name=_("date"),
+        help_text=_("date de la mesure du poids."))
     weight = models.FloatField(
-        verbose_name=_("poids"))
+        verbose_name=_("poids"),
+        help_text=_("poids mesuré (en kg)"))
 
     class Meta:
         verbose_name = _("historique de poids")
@@ -534,18 +547,23 @@ class Activity(CommonModel):
         verbose_name=_("utilisateur"))
     date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_("date"))
+        verbose_name=_("date"),
+        help_text=_("date et heure de pratique de l'activité physique"))
     type = models.CharField(
         max_length=3, choices=TYPES,
-        verbose_name=_("type"))
+        verbose_name=_("type"),
+        help_text=_("type d'activité physique pratique, influence le calcul de l'énergie dépensée"))
     duration = models.DurationField(
-        verbose_name=_("durée"))
+        verbose_name=_("durée"),
+        help_text=_("durée de l'activité physique pratique au format HH:MM:SS"))
     weight = models.FloatField(
         blank=True, null=True,
-        verbose_name=_("poids"))
+        verbose_name=_("poids"),
+        help_text=_("poids mesuré au moment de la pratique de l'activité physique (repris depuis le profil par défaut)"))
     energy = models.FloatField(
         blank=True, null=True,
-        verbose_name=_("énergie"))
+        verbose_name=_("énergie"),
+        help_text=_("energie dépensée lors de l'activité physique, calculé si non rempli"))
 
     @property
     def calculated_energy(self):
@@ -568,5 +586,69 @@ class Activity(CommonModel):
         verbose_name_plural = _("activités physiques")
 
 
+class Relation(models.Model):
+    """
+    Relation
+    """
+    TYPE_COACH = 'C'
+    TYPE_STUDENT = 'S'
+    TYPE_FRIEND = 'F'
+    TYPES = (
+        (TYPE_COACH, _("coach")),
+        (TYPE_STUDENT, _("élève")),
+        (TYPE_FRIEND, _("ami"))
+    )
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("source"), related_name='source',
+        help_text=_("utilisateur émetteur"))
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("cible"), related_name='target',
+        help_text=_("utilisateur destinataire"))
+    type = models.CharField(
+        max_length=1, choices=TYPES,
+        verbose_name=_("type"),
+        help_text=_("type de relation"))
+    date = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("date"),
+        help_text=_("date et heure de la relation"))
+    valid = models.BooleanField(
+        default=False,
+        verbose_name=_("validée"),
+        help_text=_("relation validée par l'utilisateur destinataire"))
+
+    class Meta:
+        verbose_name = _("relation")
+        verbose_name_plural = _("relations")
+
+
+class Message(models.Model):
+    """
+    Message
+    """
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("expediteur"), related_name='sent_messages',
+        help_text=_("utilisateur émetteur du message"))
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        verbose_name=_("destinataire"), related_name='received_messages',
+        help_text=_("utilisateur récepteur du message"))
+    date = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("date"),
+        help_text=_("date et heure du message"))
+    is_read = models.BooleanField(
+        default=False,
+        verbose_name=_("lu"),
+        help_text=_("message lu par le destinataire"))
+
+    class Meta:
+        verbose_name = _("message")
+        verbose_name_plural = _("messages")
+
+
 # Liste de tous les modèles connus
-MODELS = (WeightHistory, Activity,)
+MODELS = (WeightHistory, Activity, Relation, Message, )
